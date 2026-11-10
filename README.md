@@ -1,0 +1,266 @@
+# ElevenFlow
+
+**Wispr Flow–style voice typing for Android, powered by ElevenLabs speech-to-text.**
+
+A small robot bubble floats over whatever app you're in. Talk to it, and your words get typed
+into the text box you're using — WhatsApp, Telegram, Notes, a browser, anything. Text usually
+lands a fraction of a second after you stop talking.
+
+<p align="center"><img src="art/preview.png" width="480" alt="The bubble: idle (left) and recording (right, purple)"></p>
+
+You bring your own [ElevenLabs](https://elevenlabs.io) API key. It's stored only on your phone
+and sent only to ElevenLabs. There's no server in between, no account and no tracking.
+
+---
+
+## Contents
+
+- [What it does](#what-it-does)
+- [Install](#install)
+- [Setup (2 minutes)](#setup-2-minutes)
+- [Using it](#using-it)
+- [Settings](#settings)
+- [When things go wrong](#when-things-go-wrong)
+- [Privacy and cost](#privacy-and-cost)
+- [Troubleshooting](#troubleshooting)
+- [Building from source](#building-from-source)
+- [How it works](#how-it-works)
+
+---
+
+## What it does
+
+- **One bubble, two gestures.** Tap it once to start and tap again to stop, *or* hold it down
+  while you talk and let go to send. It tells them apart by how long you press.
+- **Low latency.** Audio streams live to ElevenLabs' realtime model (Scribe v2 Realtime) while
+  you speak, so the text is usually ready ~0.2–0.4 s after you stop.
+- **Types for you.** The text is pasted into the focused text box. If the box isn't ready yet, for
+  example because the keyboard is still coming back, it keeps trying for about 2 seconds. The text is
+  also always copied to the clipboard as a backup.
+- **Long recordings work.** Several minutes of speech come back as one complete piece of text.
+- **Nothing gets lost.** Every recording is saved on the phone. If the connection drops, it's
+  re-sent automatically. If there's no signal at all, it waits in the app for you to retry.
+- **Tells you when it couldn't paste.** If the text didn't land in a box (none was selected, or
+  it arrived late), a notification appears: tap it to paste into whatever box you're in now.
+- **Stays out of the way.** By default the bubble only appears while a keyboard is open, and it's
+  see-through so you can read what's underneath.
+- **Live sound wave.** While recording, a sound wave appears beside the bubble so you can see at a
+  glance that it's hearing you. There are four styles, each with a live preview in the app:
+  *Neon* (green bars and a red dot), *Classic orange*, *Line* (a smooth glowing wave) and
+  *Minimal* (white bars, no background).
+- **Your own bubble.** Use the robot, or pick any picture from your phone. The app makes its
+  "recording" look (tinted purple) automatically. The bubble can be anything from small to very large.
+- **Pauses your music.** Music or podcasts pause while you dictate and resume afterwards. If nothing
+  was playing, nothing is touched.
+- **Webhook (optional).** Give it a URL and it POSTs `{"event":"start"}` / `{"event":"stop"}`
+  as you start and finish dictating, so another device can react, for example pausing music on
+  your computer. Plain `http://` works for home or VPN addresses. Leave it empty to turn it off.
+- **Clean text.** Filler sounds (um, uh, erm) and stutters ("I, I, I want", "b-b-book",
+  "can you, can you") are removed automatically. It's handy for anyone who stutters, and you can
+  switch it off.
+- **Custom words.** Teach it names and jargon it would otherwise mishear.
+- **Phone microphone.** In Dictation settings, choose “Prefer phone microphone” to request the
+  built-in microphone even with a headset connected. During recording, the notification shows the
+  route Android reports; if it reports a different microphone, recording stops. “Unknown” means
+  Android has not reported a route and the input cannot be verified.
+- **Foldable-friendly.** The bubble keeps its place when you fold or unfold the phone or rotate it.
+
+---
+
+## Install
+
+1. Download `ElevenFlow.apk` from the [latest release](../../releases/latest) on your phone.
+2. Open it and allow installing from your browser or file manager when Android asks.
+
+Requires **Android 9 or newer**. It's developed and tested on Android 13–14.
+
+---
+
+## Setup (2 minutes)
+
+Open ElevenFlow. The big button at the top always shows the next thing to do, and the ticks show
+what's done.
+
+<p align="center"><img src="docs/setup.png" width="560" alt="Setup screen: before (left) and ready (right)"></p>
+
+1. **Paste your ElevenLabs API key** into the key field.
+   - Get one at **elevenlabs.io → Developers → API keys**. If you restrict the key's permissions,
+     it needs **Speech to Text** access.
+2. **Allow microphone** (and notifications).
+3. **Allow "draw over other apps"** so the bubble can float over other apps.
+4. **Turn on auto-paste**: Settings → Accessibility → **ElevenFlow typing** → On.
+   - If the toggle is **greyed out**, Android is blocking it because the app wasn't installed from
+     the Play Store. Go to Settings → Apps → ElevenFlow → **⋮ (top right) → Allow restricted
+     settings**, then try again.
+   - Android will warn that an accessibility service can see your screen. ElevenFlow uses it for
+     two things only: pasting text into the focused box, and noticing when a keyboard opens so the
+     bubble can appear. It doesn't read or store anything else.
+5. Tap **Start bubble**.
+
+Tip: in your phone's battery settings, set ElevenFlow to **Unrestricted**. Otherwise some phones
+(OnePlus, Xiaomi, Samsung) may shut the bubble down in the background.
+
+---
+
+## Using it
+
+| You want to… | Do this |
+|---|---|
+| Dictate hands-free | **Tap** the bubble (it turns purple), talk, **tap** again to send |
+| Push-to-talk | **Hold** the bubble while you talk, **let go** to send |
+| Move the bubble | **Drag** it. Dragging never stops a recording that's in progress |
+| See it's hearing you | Watch the sound meter that appears beside the bubble while recording |
+| Get an old dictation | Open the app → **Recent**: tap any entry to copy it |
+| Re-run a transcription | Open the app → **Recent** → **↻ transcribe again** under that entry |
+
+- Recording starts the instant your finger touches the bubble, so nothing gets cut off at the start.
+- A press shorter than 0.3 s counts as a tap; anything longer counts as a hold. You can change this
+  in Settings.
+- If you press and say nothing, nothing is typed and the recording is discarded.
+- The always-on notification shows how long the last result took ("Last: 240 ms after stop").
+  Tapping it opens the app. To switch the bubble off, use the **Stop bubble** button in the app.
+
+---
+
+## Settings
+
+Everything applies instantly, even while the bubble is on screen.
+
+| Setting | What it does | Default |
+|---|---|---|
+| **Size** | Bubble size, 36–240 dp (the sound wave grows with it) | 60 dp |
+| **Bubble image** | The robot, or **Choose your own image…** (cropped to a square; the purple recording look is made for you). **Back to the robot** undoes it | Robot |
+| **See-through when idle** | How visible the bubble is when not recording | 37% |
+| **See-through when recording** | How visible it is while recording | 65% |
+| **Only show when the keyboard is up** | Hide the bubble unless you're typing somewhere | On |
+| **Sound meter while recording** | The sound wave beside the bubble | On |
+| **Sound wave style** | Neon, Classic orange, Line or Minimal: tap a preview to choose | Neon |
+| **Vibrate on start / stop** | A small buzz when recording starts and ends | On |
+| **Tap vs hold** | Press length that counts as a hold, 150–800 ms | 300 ms |
+| **Remove filler words and stutters** | Drops um/uh/erm, repeated words and phrases, and stuttered word-starts | On |
+| **Detect language** | Off = English only (slightly more accurate). On = auto-detect | Off |
+| **Custom words** | Comma-separated names or jargon to recognise, e.g. `Kubernetes, Siobhan, PnL` | — |
+
+---
+
+## When things go wrong
+
+ElevenFlow is built so a dictation is never silently lost:
+
+| What happened | What ElevenFlow does |
+|---|---|
+| No text box was selected, or the app blocked pasting | Copies the text and shows **"Dictation ready — tap to paste"**. Tap it and the text goes into whatever box you're in now. **Copy** just copies it. |
+| The connection dropped while you were talking, or the result was slow | Sends the saved recording again via ElevenLabs' file endpoint (a 75 s recording takes ~3 s), then pastes as normal |
+| No signal at all | Keeps the recording and shows **"Not transcribed yet — tap to try again"**. Anything heard before the drop is put in the clipboard. You can also retry later from **Recent** in the app. |
+| Android stopped the bubble | Brings it back automatically. If Android won't let it use the microphone yet, it shows **"tap to turn it on"**: one tap fixes it. |
+| Android blocked the microphone (the recording is pure silence) | Shows **"Android blocked the mic — tap here, then dictate again"** |
+
+---
+
+## Privacy and cost
+
+- **Your API key** is stored in the app's private storage on your phone. It's sent only to
+  `api.elevenlabs.io`, and it's never included in this repository or in the released APK.
+- **Your audio** goes straight from your phone to ElevenLabs for transcription, and nowhere else.
+  See [ElevenLabs' privacy policy](https://elevenlabs.io/privacy). ElevenLabs' own request logging
+  is left at its default.
+- **Recordings and text** from your last 20 dictations are kept on the phone (app-private storage)
+  so you can retry or copy them. Older ones are deleted automatically.
+- **Cost:** transcription is billed to your ElevenLabs account according to your plan. Retries
+  send the audio again, so they're billed again.
+
+---
+
+## Troubleshooting
+
+**The accessibility toggle is greyed out.**
+Settings → Apps → ElevenFlow → ⋮ → *Allow restricted settings*. Then turn it on in Accessibility.
+
+**Text goes to the clipboard but isn't pasted.**
+Check that auto-paste has a ✓ in the app. If a notification says "Dictation ready — tap to paste",
+tap into the text box first, then tap the notification.
+
+**"Message" (or another placeholder) appears before my text.**
+Some chat apps report their grey placeholder as if it were real text. Common ones are handled
+already. If you find another, open an issue with the app's name and the placeholder text.
+
+**The bubble disappeared.**
+Open ElevenFlow: it restarts the bubble. Set battery usage to Unrestricted so it isn't killed.
+Avoid *Force stop* on the app's info page: on some phones it also switches off the accessibility
+service, and you'll need to turn it on again.
+
+**"HTTP 401" / "auth_error".**
+The API key is wrong, expired, or lacks Speech to Text permission. Paste a new one in the app.
+
+**It mishears names.**
+Add them under **Custom words**.
+
+---
+
+## Building from source
+
+Requirements: JDK 17 (the one bundled with Android Studio works) and the Android SDK (platform 34).
+
+```bash
+git clone https://github.com/deepbreathin/elevenflow.git
+cd elevenflow
+echo "sdk.dir=$HOME/Library/Android/sdk" > local.properties   # path to your Android SDK
+./gradlew assembleDebug -PnoKey
+# → app/build/outputs/apk/debug/app-debug.apk
+```
+
+`-PnoKey` builds without any key; users paste their own in the app.
+
+**Optional, personal builds only:** put a fallback key in `secrets.properties` (git-ignored) so
+you don't have to paste it in the app:
+
+```properties
+ELEVENLABS_API_KEY=sk_...
+```
+
+A key entered in the app always takes priority. Never share an APK built with a key in
+`secrets.properties`, because anyone could extract the key from it.
+
+The bubble artwork is generated from `art/robot.webp` by `art/make_bubble.py`.
+
+### Releasing a new version
+
+What's in each version is in [docs/RELEASE-NOTES.md](docs/RELEASE-NOTES.md).
+
+1. Check `versionCode` and `versionName` in `app/build.gradle.kts` match the version you're
+   releasing (e.g. `20` / `"0.20"`), and that the version has a section in the release notes.
+2. Build **on the same computer as the earlier releases**, always with `-PnoKey`:
+   ```bash
+   git checkout main && git pull
+   ./gradlew assembleDebug -PnoKey
+   cp app/build/outputs/apk/debug/app-debug.apk ElevenFlow.apk
+   ```
+   The APK is signed with that computer's debug key. A build from anywhere else (another
+   computer, a cloud session) has a different key, and phones refuse it as an update, so people
+   would have to uninstall first and lose their settings.
+3. Publish the release, tagged `v<versionName>` on `main`, with the APK named exactly
+   `ElevenFlow.apk` (the [Install](#install) link points at that name). Use that version's section
+   of the release notes as the description:
+   ```bash
+   gh release create v0.20 ElevenFlow.apk --target main --title "ElevenFlow 0.20" --notes-file notes.md
+   ```
+   (`notes.md` = just that version's section, copied out of `docs/RELEASE-NOTES.md`.)
+4. In `docs/RELEASE-NOTES.md`, remove "(not published yet)" from that version's heading.
+
+---
+
+## How it works
+
+In short: the bubble records 16 kHz audio and streams it over a WebSocket to ElevenLabs' realtime
+model. When you stop, it asks for the final text, then pastes it through an accessibility service.
+Every recording is also saved as a WAV, which is the fallback if the live connection has any trouble.
+
+The full technical write-up is in **[docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md)**. It covers the
+architecture, the file-by-file map, the ElevenLabs quirks found while testing (long recordings,
+replay speed limits, placeholder text), Android background rules, and how to test with the emulator.
+
+---
+
+## License
+
+[MIT](LICENSE)
